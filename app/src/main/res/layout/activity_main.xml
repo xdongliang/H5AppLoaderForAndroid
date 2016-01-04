@@ -30,10 +30,20 @@
         android:layout_alignBaseline="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:text="等待启动..."/>
-
-    <WebView
-        android:id="@+id/webView"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_below="@+id/button"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></WebView>
+        android:layout_height="match_parent">
+        <WebView
+            android:layout_weight="1"
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:layout_weight="2"
+            android:id="@+id/logContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </RelativeLayout>

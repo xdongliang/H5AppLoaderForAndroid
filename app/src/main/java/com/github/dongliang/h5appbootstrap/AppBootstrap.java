@@ -22,16 +22,6 @@ import java.util.Map;
  * Created by dongliang on 2015/12/30.
  */
 public class AppBootstrap {
-    private static final int REPORT_PROGRESS = 100;
-    private static final int ERROR = 200;
-    private static final int SUCCESS = 300;
-    private static final int CANCLE = 400;
-    private static final String STARTUP_PAGE = "STARTUP_PAGE";
-    private static final String ERROR_EXCEPTION = "ERROR_EXCEPTION";
-    private static final String PROGRESS = "PROGRESS";
-    private static final String CURRENT_FILE = "CURRENT_FILE";
-    private static final int UPDATE_OR_NEW = 1;
-    private static final int DELETE = 2;
 
     private Setting mSetting;
     private String h5appRootDirPath;
@@ -48,7 +38,7 @@ public class AppBootstrap {
     @NonNull
     public Cancellable boot(@NonNull final String appName, @NonNull final BootCallback progress) {
         isCancelled = false;
-        final Handler mainHandler = new Handler(mSetting.getContext().getMainLooper(), new MainCallback(progress));
+        final Handler mainHandler = new Handler(mSetting.getContext().getMainLooper(), new HandlerCallback(progress));
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -113,20 +103,18 @@ public class AppBootstrap {
                     reportProgress(getProgress(diffItems.size(), currentIdx), fileItem.path);
 
                     switch (fileItem.modifiedType) {
-                        case UPDATE_OR_NEW://update or new
+                        case AppManifest.FileItem.NEW://update or new
+                        case AppManifest.FileItem.UPDATE:
                             String serverPath = mSetting.getAppServerUrl() + "/" + appName + "/" + fileItem.path;
                             getHttpFile(serverPath, 0, localPath);
-                            int idx = oldManifest.files.indexOf(fileItem);
-                            fileItem.modifiedType = 0;
-                            if (idx == -1) {
-                                //在旧的里面没找到就新增
+                            if (fileItem.modifiedType == AppManifest.FileItem.NEW) {
                                 oldManifest.files.add(fileItem);
                             } else {
-                                //在旧的里面找到了就修改
+                                int idx = oldManifest.files.indexOf(fileItem);
                                 oldManifest.files.get(idx).hash = fileItem.hash;
                             }
                             break;
-                        case DELETE: //delete
+                        case AppManifest.FileItem.DELETE: //delete
                             File file = new File(localPath);
                             file.delete();
                             //从旧的manifest文件移除这个fileItem
@@ -158,11 +146,11 @@ public class AppBootstrap {
             private void reportProgress(int progress, String currentFile) {
 
                 Bundle data = new Bundle();
-                data.putInt(PROGRESS, progress);
-                data.putString(CURRENT_FILE, currentFile);
+                data.putInt(HandlerCallback.PROGRESS, progress);
+                data.putString(HandlerCallback.CURRENT_FILE, currentFile);
 
                 Message msg = new Message();
-                msg.what = REPORT_PROGRESS;
+                msg.what = HandlerCallback.REPORT_PROGRESS;
                 msg.setData(data);
 
                 mainHandler.sendMessage(msg);
@@ -181,24 +169,24 @@ public class AppBootstrap {
                 }
 
                 Bundle data = new Bundle();
-                data.putString(STARTUP_PAGE, startupPage);
+                data.putString(HandlerCallback.STARTUP_PAGE, startupPage);
                 Message msg = new Message();
-                msg.what = SUCCESS;
+                msg.what = HandlerCallback.SUCCESS;
                 msg.setData(data);
                 mainHandler.sendMessage(msg);
             }
 
             private void onError(Exception ex) {
                 Bundle data = new Bundle();
-                data.putSerializable(ERROR_EXCEPTION, ex);
+                data.putSerializable(HandlerCallback.ERROR_EXCEPTION, ex);
                 Message msg = new Message();
-                msg.what = ERROR;
+                msg.what = HandlerCallback.ERROR;
                 msg.setData(data);
                 mainHandler.sendMessage(msg);
             }
 
             private void onCancelled() {
-                mainHandler.sendEmptyMessage(CANCLE);
+                mainHandler.sendEmptyMessage(HandlerCallback.CANCEL);
             }
         });
         thread.start();
@@ -223,39 +211,45 @@ public class AppBootstrap {
     private List<AppManifest.FileItem> compare(AppManifest oldManifest, AppManifest newManifest) {
 
         Map<String, AppManifest.FileItem> fileItemMap = new HashMap<>();
-        List<AppManifest.FileItem> diffItems = new ArrayList<>();
 
         for (AppManifest.FileItem newItem : newManifest.files) {
+            newItem.modifiedType = AppManifest.FileItem.NEW;
             fileItemMap.put(newItem.path, newItem);
         }
 
         for (AppManifest.FileItem oldItem : oldManifest.files) {
-            AppManifest.FileItem newItem = fileItemMap.get(oldItem.path);
-            if (newItem == null) {
-                oldItem.modifiedType = DELETE;
-                diffItems.add(oldItem);
+            AppManifest.FileItem item = fileItemMap.get(oldItem.path);
+            if (item == null) {
+                oldItem.modifiedType = AppManifest.FileItem.DELETE;
+                fileItemMap.put(oldItem.path, oldItem);
             } else {
-                fileItemMap.remove(oldItem.path);
-                if (!newItem.hash.equals(oldItem.hash)) {
-                    newItem.modifiedType = UPDATE_OR_NEW;
-                    diffItems.add(newItem);
+                if (item.hash.equals(oldItem.hash)) {
+                    item.modifiedType = AppManifest.FileItem.NONE;
+                }else {
+                    item.modifiedType = AppManifest.FileItem.UPDATE;
                 }
             }
         }
 
-        for (AppManifest.FileItem newItem : fileItemMap.values()) {
-            newItem.modifiedType = UPDATE_OR_NEW;
-            diffItems.add(newItem);
-        }
-
-        return diffItems;
+        return new ArrayList<>(fileItemMap.values());
     }
 
-    private class MainCallback implements Handler.Callback {
+    private class HandlerCallback implements Handler.Callback {
+
+        public static final int REPORT_PROGRESS = 100;
+        public static final int ERROR = 200;
+        public static final int SUCCESS = 300;
+        public static final int CANCEL = 400;
+
+        public static final String STARTUP_PAGE = "STARTUP_PAGE";
+        public static final String ERROR_EXCEPTION = "ERROR_EXCEPTION";
+        public static final String PROGRESS = "PROGRESS";
+        public static final String CURRENT_FILE = "CURRENT_FILE";
+
 
         private BootCallback mProgress;
 
-        public MainCallback(BootCallback progress) {
+        public HandlerCallback(BootCallback progress) {
             mProgress = progress;
         }
 
@@ -275,7 +269,7 @@ public class AppBootstrap {
                     Exception ex = (Exception) msg.getData().getSerializable(ERROR_EXCEPTION);
                     mProgress.onError(ex);
                     break;
-                case CANCLE:
+                case CANCEL:
                     mProgress.onCancelled();
                     break;
                 default:

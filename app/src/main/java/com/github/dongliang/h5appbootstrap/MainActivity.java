@@ -3,10 +3,12 @@ package com.github.dongliang.h5appbootstrap;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -18,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button button;
     private TextView textView;
     private WebView webView;
+    private EditText logContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button = (Button)findViewById(R.id.button);
         textView = (TextView)findViewById(R.id.textView);
         webView = (WebView)findViewById(R.id.webView);
+        logContainer = (EditText)findViewById(R.id.logContainer);
 
         //覆盖WebView默认使用第三方或系统默认浏览器打开网页的行为，使网页用WebView打开
         webView.setWebViewClient(webViewClient);
@@ -66,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void reportProgress(int progress, String currentFile) {
             progressBar.setProgress(progress);
             textView.setText(currentFile);
+            if(TextUtils.isEmpty(currentFile))
+                return;
+            logContainer.append("Loading : " + currentFile+"\r\n");
         }
 
         @Override
