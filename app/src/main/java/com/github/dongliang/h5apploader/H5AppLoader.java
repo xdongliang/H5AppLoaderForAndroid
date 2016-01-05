@@ -36,7 +36,7 @@ public class H5AppLoader {
     }
 
     @NonNull
-    public Cancellable load(@NonNull final String appName, @NonNull final LoadCallback progress) {
+    public Cancellable loadApp(@NonNull final String appName, @NonNull final LoadCallback progress) {
         isCancelled = false;
         final Handler mainHandler = new Handler(mSetting.getContext().getMainLooper(), new HandlerCallback(progress));
         Thread thread = new Thread(new Runnable() {
@@ -350,7 +350,6 @@ public class H5AppLoader {
             conn.disconnect();
         }
     }
-
 
     public static abstract class Setting {
 

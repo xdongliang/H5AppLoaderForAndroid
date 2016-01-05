@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (button.getText().equals("启动")) {
-            cancellable = h5AppLoader.load("demoApp", callback);
+            cancellable = h5AppLoader.loadApp("demoApp", callback);
             textView.setText("启动中...");
             button.setText("取消");
             logContainer.setText("");
