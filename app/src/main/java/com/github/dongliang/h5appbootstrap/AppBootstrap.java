@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -125,13 +126,18 @@ public class AppBootstrap {
                         default:
                             break;
                     }
-                    //保存旧manifest文件
-                    Utils.writeTextFile(oldManifestFilePath, gson.toJson(oldManifest));
+
+                    //保存旧manifest文件的策略
+                    if(mSetting.needSaveManifest(getProgress(diffItems.size(), currentIdx+1), fileItem)) {
+                        Utils.writeTextFile(oldManifestFilePath, gson.toJson(oldManifest));
+                    }
                 }
+
                 if (isCancelled) {
                     onCancelled();
                     return;
                 }
+
                 //删除临时文件
                 File file = new File(newManifestFilePath);
                 file.delete();
@@ -283,7 +289,7 @@ public class AppBootstrap {
         }
     }
 
-    private AppManifest parseAppManifestFromFile(String manifestFilePath) {
+    private AppManifest parseAppManifestFromFile(String manifestFilePath) throws IOException {
         String json = Utils.readTextFile(manifestFilePath);
         if (TextUtils.isEmpty(json)) {
             AppManifest appManifest = new AppManifest();
@@ -334,6 +340,9 @@ public class AppBootstrap {
         if (lastModified > 0) {
             conn.setIfModifiedSince(lastModified);
         }
+
+        Log.d("getHttpFile", conn.getContentEncoding());
+
         if (conn.getResponseCode() == 200) {
             Utils.writeFile(conn.getInputStream(), saveFilePath);
             return true;
@@ -342,13 +351,30 @@ public class AppBootstrap {
     }
 
 
-    public interface Setting {
+    public abstract class Setting {
 
-        Context getContext();
+        private int saveProgress = 10;
 
-        String getAppRootDirName();
+        public abstract  Context getContext();
 
-        String getAppServerUrl();
+        public abstract   String getAppRootDirName();
+
+        public abstract  String getAppServerUrl();
+
+        /**
+         * 保存旧manifest文件的策略
+         * @param progress
+         * @param currentFileItem
+         * @return
+         */
+        @SuppressWarnings("UnusedParameters")
+        public boolean needSaveManifest(int progress, AppManifest.FileItem currentFileItem){
+            if (progress >= saveProgress) {
+                saveProgress += 10;
+                return true;
+            }
+            return false;
+        }
     }
 
     public interface BootCallback {

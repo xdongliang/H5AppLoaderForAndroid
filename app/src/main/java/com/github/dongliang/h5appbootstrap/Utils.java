@@ -20,7 +20,7 @@ public class Utils {
      * @param inputStream 下载文件的字节流对象
      * @param filePath    文件的存放目录
      */
-    public static void writeFile(InputStream inputStream, String filePath) {
+    public static void writeFile(InputStream inputStream, String filePath) throws IOException {
         OutputStream output = null;
         try {
             //在指定目录创建一个空文件并获取文件对象
@@ -32,17 +32,15 @@ public class Utils {
             file.createNewFile();
             //获取一个写入文件流对象
             output = new FileOutputStream(file);
-            //创建一个1024大小的字节数组，作为循环读取字节流的临时存储空
-            byte buffer[] = new byte[1024];
+            //创建一个8*1024大小的字节数组，作为循环读取字节流的临时存储空
+            byte buffer[] = new byte[8*1024];
             int count;
             //循环读取下载的文件到buffer对象数组中
             while ((count = inputStream.read(buffer)) != -1) {
                 //把文件写入到文件
                 output.write(buffer, 0, count);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+        }finally {
             try {
                 if (output != null) {
                     //关闭写入流
@@ -59,7 +57,7 @@ public class Utils {
      * @param filePath
      * @param content
      */
-    public static void writeTextFile(String filePath, String content){
+    public static void writeTextFile(String filePath, String content) throws IOException {
         File file = new File(filePath);
         FileWriter writer = null;
         try {
@@ -68,9 +66,7 @@ public class Utils {
             }
             writer = new FileWriter(file);
             writer.write(content);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
+        } finally {
             if (writer != null) {
                 try {
                     writer.close();
@@ -86,7 +82,7 @@ public class Utils {
      * @param filePath
      * @return
      */
-    public static String readTextFile(String filePath){
+    public static String readTextFile(String filePath) throws IOException {
         StringBuffer stringBuffer = new StringBuffer();
         File file = new File(filePath);
         if(!file.exists())
@@ -99,9 +95,7 @@ public class Utils {
             while ((tempString = reader.readLine()) != null) {
                 stringBuffer.append(tempString);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        }finally {
             if (reader != null) {
                 try {
                     reader.close();
