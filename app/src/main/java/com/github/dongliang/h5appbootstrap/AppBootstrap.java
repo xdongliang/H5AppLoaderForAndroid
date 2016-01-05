@@ -97,10 +97,12 @@ public class AppBootstrap {
                         onCancelled();
                         return;
                     }
+
                     AppManifest.FileItem fileItem = diffItems.get(currentIdx);
+
                     String localPath = appDirPath + "/" + fileItem.path;
                     //更新进度
-                    reportProgress(getProgress(diffItems.size(), currentIdx), fileItem.path);
+                    reportProgress(getProgress(diffItems.size(), currentIdx), fileItem);
 
                     switch (fileItem.modifiedType) {
                         case AppManifest.FileItem.NEW://update or new
@@ -143,11 +145,12 @@ public class AppBootstrap {
                 return (int) (currentIdx / diffItemCount * 100);
             }
 
-            private void reportProgress(int progress, String currentFile) {
+            private void reportProgress(int progress, AppManifest.FileItem fileItem) {
 
                 Bundle data = new Bundle();
                 data.putInt(HandlerCallback.PROGRESS, progress);
-                data.putString(HandlerCallback.CURRENT_FILE, currentFile);
+                data.putString(HandlerCallback.CURRENT_FILE, fileItem == null ? "" : fileItem.path);
+                data.putInt(HandlerCallback.MODIFIED_TYPE, fileItem == null ? AppManifest.FileItem.NONE : fileItem.modifiedType);
 
                 Message msg = new Message();
                 msg.what = HandlerCallback.REPORT_PROGRESS;
@@ -158,7 +161,7 @@ public class AppBootstrap {
 
             private void onSuccess(String appDirPath, AppManifest oldManifest) {
                 //报告100%进度
-                reportProgress(100, "");
+                reportProgress(100, null);
 
                 String startupPage;
                 // 报告启动完毕, 并返回指定的启动页
@@ -245,6 +248,7 @@ public class AppBootstrap {
         public static final String ERROR_EXCEPTION = "ERROR_EXCEPTION";
         public static final String PROGRESS = "PROGRESS";
         public static final String CURRENT_FILE = "CURRENT_FILE";
+        public static final String MODIFIED_TYPE = "MODIFIED_TYPE";
 
 
         private BootCallback mProgress;
@@ -259,7 +263,8 @@ public class AppBootstrap {
                 case REPORT_PROGRESS:
                     int progress = msg.getData().getInt(PROGRESS);
                     String currentFile = msg.getData().getString(CURRENT_FILE);
-                    mProgress.reportProgress(progress, currentFile);
+                    int modifiedType = msg.getData().getInt(MODIFIED_TYPE, AppManifest.FileItem.NONE);
+                    mProgress.reportProgress(progress, currentFile, modifiedType);
                     break;
                 case SUCCESS:
                     String startupPage = msg.getData().getString(STARTUP_PAGE);
@@ -347,7 +352,7 @@ public class AppBootstrap {
     }
 
     public interface BootCallback {
-        void reportProgress(int progress, String currentFile);
+        void reportProgress(int progress, String currentFile, int modifiedType);
 
         void onError(Exception ex);
 

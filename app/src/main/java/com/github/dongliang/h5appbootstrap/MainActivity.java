@@ -1,14 +1,13 @@
 package com.github.dongliang.h5appbootstrap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -19,8 +18,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressBar progressBar;
     private Button button;
     private TextView textView;
-    private WebView webView;
-    private EditText logContainer;
+    private TextView logContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +26,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setTitle("H5 App Bootstrap Demo");
         setContentView(R.layout.activity_main);
 
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        button = (Button)findViewById(R.id.button);
-        textView = (TextView)findViewById(R.id.textView);
-        webView = (WebView)findViewById(R.id.webView);
-        logContainer = (EditText)findViewById(R.id.logContainer);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        button = (Button) findViewById(R.id.button);
+        textView = (TextView) findViewById(R.id.textView);
+        logContainer = (TextView) findViewById(R.id.logContainer);
 
-        //覆盖WebView默认使用第三方或系统默认浏览器打开网页的行为，使网页用WebView打开
-        webView.setWebViewClient(webViewClient);
+        logContainer.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         button.setOnClickListener(this);
 
         appBootstrap = new AppBootstrap(new AppBootstrap.Setting() {
@@ -56,23 +53,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private WebViewClient webViewClient = new WebViewClient(){
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            //返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
-            view.loadUrl(url);
-            return true;
-        }
-    };
-
     private AppBootstrap.BootCallback callback = new AppBootstrap.BootCallback() {
         @Override
-        public void reportProgress(int progress, String currentFile) {
+        public void reportProgress(int progress, String currentFile, int modifiedType) {
             progressBar.setProgress(progress);
             textView.setText(currentFile);
-            if(TextUtils.isEmpty(currentFile))
+            if (TextUtils.isEmpty(currentFile))
                 return;
-            logContainer.append("Loading : " + currentFile+"\r\n");
+            String strModifiedType = getModifiedType(modifiedType);
+            logContainer.append("文件 : " + currentFile + " -> " + strModifiedType + "\r\n");
+        }
+
+        private String getModifiedType(int modifiedType) {
+
+            switch (modifiedType) {
+                case AppManifest.FileItem.NEW:
+                    return "新增";
+                case AppManifest.FileItem.UPDATE:
+                    return "修改";
+                case AppManifest.FileItem.DELETE:
+                    return "刪除";
+                default:
+                    return "不处理";
+            }
+
         }
 
         @Override
@@ -84,7 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onSuccess(String startupPage) {
             button.setText("启动");
             textView.setText("启动完成!");
-            webView.loadUrl(startupPage);
+
+            Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+            intent.putExtra(WebViewActivity.START_PAGE_PARAM, startupPage);
+            startActivity(intent);
         }
 
         @Override
@@ -93,28 +100,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private AppBootstrap.Cancellable cancellable;
+
     @Override
     public void onClick(View v) {
-        if(button.getText().equals("启动")) {
+        if (button.getText().equals("启动")) {
             cancellable = appBootstrap.boot("demoApp", callback);
             textView.setText("启动中...");
             button.setText("取消");
-        }else {
+            logContainer.setText("");
+        } else {
             cancellable.cancel();
             textView.setText("取消中...");
             button.setText("启动");
         }
-//        Thread t = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                cancellable.cancel();
-//            }
-//        });
-//        t.start();
     }
 }
