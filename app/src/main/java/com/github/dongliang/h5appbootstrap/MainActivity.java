@@ -35,23 +35,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         button.setOnClickListener(this);
 
-        appBootstrap = new AppBootstrap(new AppBootstrap.Setting() {
-            @Override
-            public Context getContext() {
-                return MainActivity.this;
-            }
-
-            @Override
-            public String getAppRootDirName() {
-                return "h5apps";
-            }
-
-            @Override
-            public String getAppServerUrl() {
-                return "http://10.200.101.164";
-            }
-        });
+        appBootstrap = new AppBootstrap(setting);
     }
+
+    private AppBootstrap.Setting setting = new AppBootstrap.Setting() {
+
+        @Override
+        public Context getContext() {
+            return MainActivity.this;
+        }
+
+        @Override
+        public String getAppRootDirName() {
+            return "h5apps";
+        }
+
+        @Override
+        public String getAppServerUrl() {
+            return "http://10.200.101.164";
+        }
+    };
 
     private AppBootstrap.BootCallback callback = new AppBootstrap.BootCallback() {
         @Override
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onError(Exception ex) {
+            button.setText("启动");
             textView.setText(ex.getMessage());
         }
 

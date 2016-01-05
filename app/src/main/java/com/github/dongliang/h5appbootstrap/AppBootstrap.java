@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -335,23 +334,25 @@ public class AppBootstrap {
 
     private boolean getHttpFile(String httpUrl, long lastModified, String saveFilePath) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(httpUrl).openConnection();
-        conn.setRequestMethod("GET");
-        conn.setUseCaches(false);
-        if (lastModified > 0) {
-            conn.setIfModifiedSince(lastModified);
-        }
+        try {
+            conn.setRequestMethod("GET");
+            conn.setUseCaches(false);
+            if (lastModified > 0) {
+                conn.setIfModifiedSince(lastModified);
+            }
 
-        Log.d("getHttpFile", conn.getContentEncoding());
-
-        if (conn.getResponseCode() == 200) {
-            Utils.writeFile(conn.getInputStream(), saveFilePath);
-            return true;
+            if (conn.getResponseCode() == 200) {
+                Utils.writeFile(conn.getInputStream(), saveFilePath);
+                return true;
+            }
+            return false;
+        }finally {
+            conn.disconnect();
         }
-        return false;
     }
 
 
-    public abstract class Setting {
+    public static abstract class Setting {
 
         private int saveProgress = 10;
 
