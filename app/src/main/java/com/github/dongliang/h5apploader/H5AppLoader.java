@@ -1,4 +1,4 @@
-package com.github.dongliang.h5appbootstrap;
+package com.github.dongliang.h5apploader;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -21,14 +21,14 @@ import java.util.Map;
 /**
  * Created by dongliang on 2015/12/30.
  */
-public class AppBootstrap {
+public class H5AppLoader {
 
     private Setting mSetting;
     private String h5appRootDirPath;
     private volatile boolean isCancelled;
     private Gson gson = new Gson();
 
-    public AppBootstrap(@NonNull Setting setting) {
+    public H5AppLoader(@NonNull Setting setting) {
         mSetting = setting;
         //获取保存app的根目录
         File appRootDir = setting.getContext().getExternalFilesDir(null);
@@ -36,7 +36,7 @@ public class AppBootstrap {
     }
 
     @NonNull
-    public Cancellable boot(@NonNull final String appName, @NonNull final BootCallback progress) {
+    public Cancellable load(@NonNull final String appName, @NonNull final LoadCallback progress) {
         isCancelled = false;
         final Handler mainHandler = new Handler(mSetting.getContext().getMainLooper(), new HandlerCallback(progress));
         Thread thread = new Thread(new Runnable() {
@@ -256,9 +256,9 @@ public class AppBootstrap {
         public static final String MODIFIED_TYPE = "MODIFIED_TYPE";
 
 
-        private BootCallback mProgress;
+        private LoadCallback mProgress;
 
-        public HandlerCallback(BootCallback progress) {
+        public HandlerCallback(LoadCallback progress) {
             mProgress = progress;
         }
 
@@ -358,7 +358,9 @@ public class AppBootstrap {
 
         public abstract  Context getContext();
 
-        public abstract   String getAppRootDirName();
+        public String getAppRootDirName(){
+            return "h5apps";
+        }
 
         public abstract  String getAppServerUrl();
 
@@ -378,7 +380,7 @@ public class AppBootstrap {
         }
     }
 
-    public interface BootCallback {
+    public interface LoadCallback {
         void reportProgress(int progress, String currentFile, int modifiedType);
 
         void onError(Exception ex);

@@ -1,4 +1,4 @@
-package com.github.dongliang.h5appbootstrap;
+package com.github.dongliang.h5apploader;
 
 import android.app.Activity;
 import android.os.Bundle;

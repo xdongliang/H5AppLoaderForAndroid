@@ -1,4 +1,4 @@
-package com.github.dongliang.h5appbootstrap;
+package com.github.dongliang.h5apploader;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private AppBootstrap appBootstrap;
+    private H5AppLoader h5AppLoader;
 
     private ProgressBar progressBar;
     private Button button;
@@ -35,19 +35,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         button.setOnClickListener(this);
 
-        appBootstrap = new AppBootstrap(setting);
+        h5AppLoader = new H5AppLoader(setting);
     }
 
-    private AppBootstrap.Setting setting = new AppBootstrap.Setting() {
+    private H5AppLoader.Setting setting = new H5AppLoader.Setting() {
 
         @Override
         public Context getContext() {
             return MainActivity.this;
-        }
-
-        @Override
-        public String getAppRootDirName() {
-            return "h5apps";
         }
 
         @Override
@@ -56,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    private AppBootstrap.BootCallback callback = new AppBootstrap.BootCallback() {
+    private H5AppLoader.LoadCallback callback = new H5AppLoader.LoadCallback() {
         @Override
         public void reportProgress(int progress, String currentFile, int modifiedType) {
             progressBar.setProgress(progress);
@@ -103,12 +98,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             textView.setText("已取消!");
         }
     };
-    private AppBootstrap.Cancellable cancellable;
+    private H5AppLoader.Cancellable cancellable;
 
     @Override
     public void onClick(View v) {
         if (button.getText().equals("启动")) {
-            cancellable = appBootstrap.boot("demoApp", callback);
+            cancellable = h5AppLoader.load("demoApp", callback);
             textView.setText("启动中...");
             button.setText("取消");
             logContainer.setText("");
