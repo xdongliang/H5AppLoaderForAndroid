@@ -5,9 +5,6 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 public class WebViewActivity extends Activity {
 
     public static final String START_PAGE_PARAM = "com.github.dongliang.h5appbootstrap.WebViewActivity.START_PAGE";
@@ -22,12 +19,7 @@ public class WebViewActivity extends Activity {
         webView.setWebViewClient(webViewClient);
         String startupPage = getIntent().getStringExtra(START_PAGE_PARAM);
 
-
-        try {
-            webView.loadUrl(startupPage + "?accessToken=5aa30dee4bc048149cf07116d63e43f3&deviceUniqueId=a086d81951c6fe56&channel=2&version=1.0.10&apiRoot="+ URLEncoder.encode("http://hipartytest.830clock.cn/", "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        webView.loadUrl(startupPage);
     }
 
     private WebViewClient webViewClient = new WebViewClient(){
