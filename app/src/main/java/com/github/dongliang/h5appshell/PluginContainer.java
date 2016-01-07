@@ -7,7 +7,7 @@ import com.github.dongliang.h5appshell.plugins.Plugin;
  * Date: 2016/1/6
  * Description: DO WHAT
  */
-public class PluginContainer implements PluginLocator,PluginRegister {
+public class PluginContainer implements PluginLocator, PluginRegister {
     @Override
     public Plugin locate(String pluginName) {
         return null;

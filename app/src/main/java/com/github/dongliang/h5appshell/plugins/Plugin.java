@@ -1,5 +1,7 @@
 package com.github.dongliang.h5appshell.plugins;
 
+import android.webkit.WebView;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -21,6 +23,6 @@ public abstract class Plugin<TParameter> {
         }
     }
 
-    public abstract void excute(TParameter parameter);
+    public abstract void execute(WebView webView, TParameter parameter);
 
 }
