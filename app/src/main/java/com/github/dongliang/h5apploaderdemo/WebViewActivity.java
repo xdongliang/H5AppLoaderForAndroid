@@ -1,4 +1,4 @@
-package com.github.dongliang.h5apploader;
+package com.github.dongliang.h5apploaderdemo;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.webkit.WebViewClient;
 
 public class WebViewActivity extends Activity {
 
-    public static final String START_PAGE_PARAM = "com.github.dongliang.h5appbootstrap.WebViewActivity.START_PAGE";
+    public static final String START_PAGE_PARAM = "com.github.dongliang.h5apploaderdemo.WebViewActivity.START_PAGE";
 
     private WebView webView;
     @Override

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.github.dongliang.h5apploader.WebViewActivity">
+    tools:context="com.github.dongliang.h5apploaderdemo.WebViewActivity">
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"

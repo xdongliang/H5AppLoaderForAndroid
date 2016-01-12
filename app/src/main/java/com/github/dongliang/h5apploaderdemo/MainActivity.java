@@ -1,4 +1,4 @@
-package com.github.dongliang.h5apploader;
+package com.github.dongliang.h5apploaderdemo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.github.dongliang.h5apploader.AppManifest;
+import com.github.dongliang.h5apploader.H5AppLoader;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
