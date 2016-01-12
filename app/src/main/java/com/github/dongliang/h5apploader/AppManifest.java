@@ -17,7 +17,7 @@ public class AppManifest {
     public class FileItem{
 
         public static final int NONE = 0;
-        public static final int NEW = 1;
+        public static final int ADD = 1;
         public static final int UPDATE = 2;
         public static final int DELETE = 3;
 

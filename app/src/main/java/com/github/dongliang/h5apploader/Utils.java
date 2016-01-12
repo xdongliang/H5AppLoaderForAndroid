@@ -13,7 +13,6 @@ import java.io.OutputStream;
  * Created by dongliang on 2015/12/30.
  */
 public class Utils {
-
     /**
      * 写入文件
      *
@@ -51,7 +50,6 @@ public class Utils {
             }
         }
     }
-
     /**
      * 保存文本文件
      * @param filePath
@@ -106,6 +104,4 @@ public class Utils {
         }
         return stringBuffer.toString();
     }
-
-
 }

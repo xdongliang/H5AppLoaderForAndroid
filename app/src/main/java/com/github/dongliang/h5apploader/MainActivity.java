@@ -59,58 +59,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (TextUtils.isEmpty(currentFile))
                 return;
             String strModifiedType = getModifiedType(modifiedType);
-            logContainer.append("文件 : " + currentFile + " -> " + strModifiedType + "\r\n");
+            logContainer.append("file : " + currentFile + " -> " + strModifiedType + "\r\n");
         }
 
         private String getModifiedType(int modifiedType) {
 
             switch (modifiedType) {
-                case AppManifest.FileItem.NEW:
-                    return "新增";
+                case AppManifest.FileItem.ADD:
+                    return "Add";
                 case AppManifest.FileItem.UPDATE:
-                    return "修改";
+                    return "Update";
                 case AppManifest.FileItem.DELETE:
-                    return "刪除";
+                    return "Delete";
                 default:
-                    return "不处理";
+                    return "DoNothing";
             }
 
         }
 
         @Override
         public void onError(Exception ex) {
-            button.setText("启动");
+            button.setText("Load");
             textView.setText(ex.getMessage());
         }
 
         @Override
-        public void onSuccess(String startupPage) {
-            button.setText("启动");
-            textView.setText("启动完成!");
+        public void onSuccess(String appPath, String startupPage) {
+            button.setText("Load");
+            textView.setText("Load Completed!");
 
             Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-            intent.putExtra(WebViewActivity.START_PAGE_PARAM, startupPage);
+            intent.putExtra(WebViewActivity.START_PAGE_PARAM, appPath + "/" + startupPage);
             startActivity(intent);
         }
 
         @Override
         public void onCancelled() {
-            textView.setText("已取消!");
+            textView.setText("Cancelled!");
         }
     };
     private H5AppLoader.Cancellable cancellable;
 
     @Override
     public void onClick(View v) {
-        if (button.getText().equals("启动")) {
+        if (button.getText().equals("Load")) {
             cancellable = h5AppLoader.loadApp("demoApp", callback);
-            textView.setText("启动中...");
-            button.setText("取消");
+            textView.setText("Loading...");
+            button.setText("Cancel");
             logContainer.setText("");
         } else {
             cancellable.cancel();
-            textView.setText("取消中...");
-            button.setText("启动");
+            textView.setText("Cancelling...");
+            button.setText("Load");
         }
     }
 }

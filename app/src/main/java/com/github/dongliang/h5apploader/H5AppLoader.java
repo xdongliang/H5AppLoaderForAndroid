@@ -105,11 +105,11 @@ public class H5AppLoader {
                     reportProgress(getProgress(diffItems.size(), currentIdx), fileItem);
 
                     switch (fileItem.modifiedType) {
-                        case AppManifest.FileItem.NEW://update or new
+                        case AppManifest.FileItem.ADD://update or new
                         case AppManifest.FileItem.UPDATE:
                             String serverPath = mSetting.getAppServerUrl() + "/" + appName + "/" + fileItem.path;
                             getHttpFile(serverPath, 0, localPath);
-                            if (fileItem.modifiedType == AppManifest.FileItem.NEW) {
+                            if (fileItem.modifiedType == AppManifest.FileItem.ADD) {
                                 oldManifest.files.add(fileItem);
                             } else {
                                 int idx = oldManifest.files.indexOf(fileItem);
@@ -168,15 +168,18 @@ public class H5AppLoader {
                 //报告100%进度
                 reportProgress(100, null);
 
+
+                String appPath = "file://" + appDirPath;
                 String startupPage;
                 // 报告启动完毕, 并返回指定的启动页
                 if (TextUtils.isEmpty(oldManifest.startup)) {
-                    startupPage = ("file://" + appDirPath + "/index.html");
+                    startupPage = "index.html";
                 } else {
-                    startupPage = ("file://" + appDirPath + "/" + oldManifest.startup);
+                    startupPage = oldManifest.startup;;
                 }
 
                 Bundle data = new Bundle();
+                data.putString(HandlerCallback.APP_PATH, appPath);
                 data.putString(HandlerCallback.STARTUP_PAGE, startupPage);
                 Message msg = new Message();
                 msg.what = HandlerCallback.SUCCESS;
@@ -221,7 +224,7 @@ public class H5AppLoader {
         Map<String, AppManifest.FileItem> fileItemMap = new HashMap<>();
 
         for (AppManifest.FileItem newItem : newManifest.files) {
-            newItem.modifiedType = AppManifest.FileItem.NEW;
+            newItem.modifiedType = AppManifest.FileItem.ADD;
             fileItemMap.put(newItem.path, newItem);
         }
 
@@ -250,6 +253,7 @@ public class H5AppLoader {
         public static final int CANCEL = 400;
 
         public static final String STARTUP_PAGE = "STARTUP_PAGE";
+        public static final String APP_PATH = "APP_PATH";
         public static final String ERROR_EXCEPTION = "ERROR_EXCEPTION";
         public static final String PROGRESS = "PROGRESS";
         public static final String CURRENT_FILE = "CURRENT_FILE";
@@ -272,8 +276,9 @@ public class H5AppLoader {
                     mProgress.reportProgress(progress, currentFile, modifiedType);
                     break;
                 case SUCCESS:
+                    String appPath = msg.getData().getString(APP_PATH);
                     String startupPage = msg.getData().getString(STARTUP_PAGE);
-                    mProgress.onSuccess(startupPage);
+                    mProgress.onSuccess(appPath, startupPage);
                     break;
                 case ERROR:
                     Exception ex = (Exception) msg.getData().getSerializable(ERROR_EXCEPTION);
@@ -384,7 +389,7 @@ public class H5AppLoader {
 
         void onError(Exception ex);
 
-        void onSuccess(String startupPage);
+        void onSuccess(String appPath,  String startupPage);
 
         void onCancelled();
     }
